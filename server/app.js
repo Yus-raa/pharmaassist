@@ -6,6 +6,7 @@ import fileUpload from "express-fileupload";
 import { error } from "console";
 import { errorMiddleware } from "./middlewares/errorMiddleware.js";
 import authRouter from "./router/authRoutes.js";
+import productRoutes from "./router/productRoutes.js";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(
 );
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/product", productRoutes);
 
 app.use(errorMiddleware);
 

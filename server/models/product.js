@@ -39,10 +39,12 @@ const ProductSchema = new mongoose.Schema(
       max: 5,
     },
 
-    images: {
-      type: [String], // Array of image URLs
-      default: [],
-    },
+    images: [
+      {
+        public_id: String,
+        url: String
+      }
+    ],
 
     stock: {
       type: Number,
@@ -56,7 +58,7 @@ const ProductSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Optional: AI features
+    // AI features
     embeddings: {
       type: [Number], // for semantic search / AI recommendations
       default: null,
