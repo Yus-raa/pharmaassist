@@ -32,6 +32,16 @@ const ProductSchema = new mongoose.Schema(
       trim: true,
     },
 
+    symptoms: {
+      type: [String],
+      default: [],
+    },
+
+    useCases: {
+      type: [String],
+      default: [],
+    },
+    
     ratings: {
       type: Number,
       default: 0,

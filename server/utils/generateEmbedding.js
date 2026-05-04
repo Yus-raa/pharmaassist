@@ -1,46 +1,33 @@
-// Simple embedding system
+import { pipeline } from "@xenova/transformers";
 
-// Medical vocabulary boost
-const medicalVocabulary = [
-  "pain", "fever", "cough", "cold", "allergy",
-  "infection", "inflammation", "antibiotic",
-  "analgesic", "tablet", "syrup", "treatment",
-  "relief", "medicine", "drug", "dose"
-];
+let extractor = null;
 
-// Text cleaning
-const preprocess = (text) => {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s]/g, "")
-    .split(/\s+/)
-    .filter(Boolean);
+// Load model only once (IMPORTANT)
+const loadModel = async () => {
+  if (!extractor) {
+    console.log("Loading embedding model...");
+    extractor = await pipeline(
+      "feature-extraction",
+      "Xenova/paraphrase-multilingual-MiniLM-L12-v2"
+    );
+    console.log("Embedding model loaded");
+  }
 };
 
-// Build vocabulary dynamically
-const buildVocabulary = (tokens) => {
-  return [...new Set([...tokens, ...medicalVocabulary])];
-};
+export const generateEmbedding = async (text) => {
+  try {
+    await loadModel();
 
-// Term Frequency vector
-const buildVector = (tokens, vocab) => {
-  return vocab.map(word => {
-    const count = tokens.filter(t => t === word).length;
-    return count;
-  });
-};
+    const output = await extractor(text, {
+      pooling: "mean",
+      normalize: true,
+    });
 
-// Normalize vector
-const normalize = (vec) => {
-  const magnitude = Math.sqrt(vec.reduce((sum, v) => sum + v * v, 0)) || 1;
-  return vec.map(v => v / magnitude);
-};
+    // Convert tensor → normal JS array
+    return Array.from(output.data);
 
-// MAIN FUNCTION
-export const generateEmbedding = (text) => {
-  const tokens = preprocess(text);
-  const vocab = buildVocabulary(tokens);
-  const vector = buildVector(tokens, vocab);
-  return normalize(vector);
+  } catch (error) {
+    console.error("Embedding Error:", error.message);
+    return null;
+  }
 };
-

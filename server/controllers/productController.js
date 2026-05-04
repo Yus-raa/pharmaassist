@@ -7,69 +7,90 @@ import { v2 as cloudinary } from "cloudinary";
 // import { getAIRecommendation } from "../utils/getAIRecommendation.js";
 import { generateEmbedding } from "../utils/generateEmbedding.js";
 import { cosineSimilarity } from "../utils/cosineSimilarity.js";
-
+import Fuse from "fuse.js";
 
 // ---------------------------
 // CREATE PRODUCT
 export const createProduct = catchAsyncError(async (req, res, next) => {
-    const { name, description, price, category, stock } = req.body;
+  const {
+    name,
+    description,
+    price,
+    category,
+    stock,
+    symptoms,
+    useCases
+  } = req.body;
 
-    const created_by = req.user._id;
+  const created_by = req.user._id;
 
-    if (!name || !description || !price || !category || !stock) {
-        return next(new ErrorHandler("Please provide all required fields", 400));
+  if (!name || !description || !price || !category || !stock) {
+    return next(new ErrorHandler("Please provide all required fields", 400));
+  }
+
+  let uploadedImages = [];
+
+  if (req.files && req.files.images) {
+    const images = Array.isArray(req.files.images)
+      ? req.files.images
+      : [req.files.images];
+
+    for (const image of images) {
+      const result = await cloudinary.uploader.upload(image.tempFilePath, {
+        folder: "Pharmacy_Product_Images",
+        width: 1000,
+        crop: "scale",
+      });
+
+      uploadedImages.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
     }
+  }
 
-    let uploadedImages = [];
-
-    if (req.files && req.files.images) {
-        const images = Array.isArray(req.files.images)
-            ? req.files.images
-            : [req.files.images];
-
-        for (const image of images) {
-            const result = await cloudinary.uploader.upload(image.tempFilePath, {
-                folder: "Pharmacy_Product_Images",
-                width: 1000,
-                crop: "scale",
-            });
-
-            uploadedImages.push({
-                public_id: result.public_id,
-                url: result.secure_url,
-            });
-        }
+  // Normalize arrays
+  const normalizeToArray = (field) => {
+    if (!field) return [];
+    if (Array.isArray(field)) return field;
+    if (typeof field === "string") {
+      return field.split(",").map(item => item.trim().toLowerCase());
     }
+    return [];
+  };
 
-    // Generate embedding for the product
-    const textData = `
-    Product Name: ${name}
-    Description: ${description}
-    Category: ${category}
+  const normalizedSymptoms = normalizeToArray(symptoms);
+  const normalizedUseCases = normalizeToArray(useCases);
 
-    Context:
-    This is a pharmaceutical medicine or healthcare product used for treatment,
-    pain relief, fever, infection, cough, allergy, or general medical use.
-    `;
+  // PRODUCT EMBEDDING
+  const textData = `
+Product Name: ${name}
+Description: ${description}
+Category: ${category}
+Symptoms: ${normalizedSymptoms.join(", ")}
+Use Cases: ${normalizedUseCases.join(", ")}
+`;
 
-    const embedding = generateEmbedding(textData);
+  const embedding = await generateEmbedding(textData);
 
-    const product = await Product.create({
-        name,
-        description,
-        price,
-        category,
-        stock,
-        images: uploadedImages,
-        created_by,
-        embeddings: embedding,
-    });
+  const product = await Product.create({
+    name,
+    description,
+    price,
+    category,
+    stock,
+    images: uploadedImages,
+    created_by,
+    symptoms: normalizedSymptoms,
+    useCases: normalizedUseCases,
+    embeddings: embedding,
+  });
 
-    res.status(201).json({
-        success: true,
-        message: "Product created successfully",
-        product,
-    });
+  res.status(201).json({
+    success: true,
+    message: "Product created successfully",
+    product,
+  });
 });
 
 // ---------------------------
@@ -387,8 +408,6 @@ export const deleteReview = catchAsyncError(async (req, res, next) => {
 
 // ---------------------------
 // AI FILTERING
-
-
 export const fetchAIFilteredProducts = catchAsyncError(
   async (req, res, next) => {
     const { userPrompt } = req.body;
@@ -397,8 +416,7 @@ export const fetchAIFilteredProducts = catchAsyncError(
       return next(new ErrorHandler("Provide a valid prompt.", 400));
     }
 
-    // CLEAN INPUT
-    // Stopwords list
+    // KEYWORD CLEANING
     const stopWords = new Set([
       "i","me","my","we","you","he","she","it","they",
       "is","am","are","was","were","be","been",
@@ -413,18 +431,9 @@ export const fetchAIFilteredProducts = catchAsyncError(
       "other","some","such","no","nor","not","only",
       "own","same","so","than","too","very",
 
-      // Pharmacy-specific stopwords
-      "medicine",
-      "medicines",
-      "tablet",
-      "tablets",
-      "syrup",
-      "drug",
-      "drugs",
-      "for",
-      "need",
-      "want",
-      "give",
+      // pharmacy fillers
+      "medicine","medicines","tablet","tablets","syrup",
+      "drug","drugs","need","want","give"
     ]);
 
     const keywords = userPrompt
@@ -433,24 +442,18 @@ export const fetchAIFilteredProducts = catchAsyncError(
       .split(/\s+/)
       .filter(word => word && !stopWords.has(word));
 
-
-    // MEDICAL INTELLIGENCE
+    // MEDICAL MAP
     const medicalMap = {
       headache: ["pain", "paracetamol", "ibuprofen", "panadol"],
       fever: ["paracetamol", "calpol"],
       pain: ["ibuprofen", "aspirin"],
-      cough: ["cough syrup", "dextromethorphan"],
+      cough: ["cough", "dextromethorphan"],
       cold: ["antihistamine", "decongestant"],
       allergy: ["cetirizine", "loratadine"],
-      diabetes: ["insulin", "metformin"],
-      hypertension: ["amlodipine", "lisinopril"],
       infection: ["antibiotic", "amoxicillin"],
       inflammation: ["ibuprofen", "naproxen"],
       stomach: ["antacid", "omeprazole"],
-      immunization: ["immunity", "vitamin", "vitamin c", "supplement"],
       immunity: ["vitamin", "vitamin c", "supplement"],
-      heart: ["cardio", "cholesterol", "statin"],
-      
     };
 
     let expandedKeywords = [...keywords];
@@ -461,36 +464,77 @@ export const fetchAIFilteredProducts = catchAsyncError(
       }
     });
 
-    // MONGO FILTER
-    const regexQueries = expandedKeywords.map(word => ({
-      $or: [
-        { name: { $regex: word, $options: "i" } },
-        { description: { $regex: word, $options: "i" } },
-        { category: { $regex: word, $options: "i" } },
-      ]
-    }));
+    // FETCH ALL PRODUCTS
+    const allProducts = await Product.find();
 
-    const mongoResults = await Product.find({
-      $or: regexQueries
-    }).limit(50);
+    // FUZZY SEARCH
+    const fuse = new Fuse(allProducts, {
+      keys: ["name", "description", "category", "symptoms", "useCases"],
+      threshold: 0.3, // tune this (0.2–0.4)
+    });
 
-    let baseProducts = mongoResults;
+    const fuzzyResults = fuse.search(userPrompt);
+    const fuzzyProducts = fuzzyResults.slice(0, 10).map(r => r.item);
 
-    if (mongoResults.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: "No relevant products found",
-        products: []
-      });
+    // KEYWORD FILTER
+    const keywordProducts = allProducts.filter(product => {
+      const text = `
+        ${product.name}
+        ${product.description}
+        ${product.category}
+        ${(product.symptoms || []).join(" ")}
+        ${(product.useCases || []).join(" ")}
+      `.toLowerCase();
+
+      return expandedKeywords.some(word => text.includes(word));
+    });
+
+    //  MERGE RESULTS
+    const combinedMap = new Map();
+
+    [...fuzzyProducts, ...keywordProducts].forEach(p => {
+      combinedMap.set(p._id.toString(), p);
+    });
+
+    let baseProducts = Array.from(combinedMap.values());
+
+    // fallback
+    if (baseProducts.length === 0) {
+      baseProducts = allProducts.slice(0, 50);
     }
 
     // EMBEDDING RANKING
-    const queryEmbedding = generateEmbedding(userPrompt);
+    const enrichedQuery = `
+    User is looking for a medical product.
+
+    Query: ${userPrompt}
+
+    Possible symptoms: ${keywords.join(", ")}
+    Medical meaning: ${expandedKeywords.join(", ")}
+
+    Find relevant medicine or healthcare product.
+    `;
+
+    const queryEmbedding = await generateEmbedding(enrichedQuery);
+
+    if (!queryEmbedding) {
+      return res.status(200).json({
+        success: true,
+        message: "Fallback results",
+        products: baseProducts.slice(0, 10),
+      });
+    }
 
     const scoredProducts = baseProducts.map(product => {
       if (!product.embeddings) return null;
 
-      const score = cosineSimilarity(queryEmbedding, product.embeddings);
+      let boost = 0;
+
+    keywords.forEach(k => {
+      if ((product.symptoms || []).includes(k)) boost += 0.1;
+      if ((product.useCases || []).includes(k)) boost += 0.1;});
+
+    const score = cosineSimilarity(queryEmbedding, product.embeddings) + boost;
 
       return {
         ...product.toObject(),
@@ -500,10 +544,17 @@ export const fetchAIFilteredProducts = catchAsyncError(
 
     scoredProducts.sort((a, b) => b.similarity - a.similarity);
 
-    const finalProducts = scoredProducts.slice(0, 10);
+    const SIMILARITY_THRESHOLD = 0.5; // tune this (0.45–0.65)
 
-    // -----------------------------
-    // RESPONSE
+    const filteredBySimilarity = scoredProducts.filter(
+      p => p.similarity >= SIMILARITY_THRESHOLD
+    );
+
+    const finalProducts =
+      filteredBySimilarity.length > 0
+        ? filteredBySimilarity.slice(0, 10)
+        : scoredProducts.slice(0, 5); // fallback
+
     // -----------------------------
     res.status(200).json({
       success: true,
