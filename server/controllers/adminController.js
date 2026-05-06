@@ -27,3 +27,28 @@ export const getAllUsers = catchAsyncError(async (req, res, next) => {
     users,
   });
 });
+
+// DELETE USER (Admin)
+export const deleteUser = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  // delete avatar from cloudinary
+  if (user.avatar?.public_id) {
+    await cloudinary.uploader.destroy(user.avatar.public_id);
+  }
+
+  await user.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "User deleted successfully",
+  });
+});
+
+// DASHBOARD STATS (Admin)
