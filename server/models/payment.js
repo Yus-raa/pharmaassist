@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 const PaymentSchema = new mongoose.Schema(
   {
-    id: {
+    _id: {
       type: String,
       default: uuidv4, // consistent UUID primary key
     },

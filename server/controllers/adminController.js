@@ -79,6 +79,14 @@ export const dashboardStats = catchAsyncError(async (req, res, next) => {
     0
   );
 
+  const startOfYesterday = new Date();
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+  startOfYesterday.setHours(0, 0, 0, 0);
+
+  const endOfYesterday = new Date();
+  endOfYesterday.setDate(endOfYesterday.getDate() - 1);
+  endOfYesterday.setHours(23, 59, 59, 999);
+
   // TOTAL REVENUE
   const totalRevenueAgg = await Order.aggregate([
     { $match: { paid_at: { $ne: null } } },
@@ -100,6 +108,18 @@ export const dashboardStats = catchAsyncError(async (req, res, next) => {
 
   const todayRevenue = todayRevenueAgg[0]?.total || 0;
 
+  const yesterdayAgg = await Order.aggregate([
+    {
+      $match: {
+        paid_at: { $ne: null },
+        createdAt: { $gte: startOfYesterday, $lte: endOfYesterday },
+      },
+    },
+    { $group: { _id: null, total: { $sum: "$total_price" } } },
+  ]);
+
+const yesterdayRevenue = yesterdayAgg[0]?.total || 0;
+
   // USERS
   const totalUsers = await User.countDocuments({ role: "User" });
 
@@ -114,10 +134,16 @@ export const dashboardStats = catchAsyncError(async (req, res, next) => {
     },
   ]);
 
-  const orderStatusCounts = {};
-  statusAgg.forEach((s) => {
-    orderStatusCounts[s._id] = s.count;
-  });
+ const orderStatusCounts = {
+  Processing: 0,
+  Shipped: 0,
+  Delivered: 0,
+  Cancelled: 0,
+};
+
+statusAgg.forEach((s) => {
+  orderStatusCounts[s._id] = s.count;
+});
 
   // MONTHLY SALES
   const monthlySales = await Order.aggregate([
@@ -202,6 +228,7 @@ export const dashboardStats = catchAsyncError(async (req, res, next) => {
     success: true,
     totalRevenue,
     todayRevenue,
+    yesterdayRevenue,
     totalUsers,
     newUsers,
     orderStatusCounts,
