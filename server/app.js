@@ -13,9 +13,8 @@ import Stripe from "stripe";
 import Payment from "./models/payment.js";
 import Order from "./models/orders.js";
 import Product from "./models/product.js";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
+import orderRouter from "./router/orderRoutes.js";
+import stripe from "./utils/stripe.js";
 const app = express();
 
 app.use(cors({
@@ -103,6 +102,7 @@ app.use(
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/product", productRoutes);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/order", orderRouter);
 
 app.use(errorMiddleware);
 

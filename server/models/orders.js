@@ -7,14 +7,22 @@ const orderItemSchema = new mongoose.Schema({
     ref: "Product",
     required: true,
   },
+
   name: {
-    type: String, // snapshot (important)
+    type: String,
     required: true,
   },
+
+  image: {
+  type: String,
+  default: "",
+},
+
   price: {
-    type: Number, // snapshot price at time of order
+    type: Number,
     required: true,
   },
+
   quantity: {
     type: Number,
     required: true,
@@ -35,8 +43,45 @@ const OrderSchema = new mongoose.Schema(
       required: true,
     },
 
-    // CORE: items inside order
     order_items: [orderItemSchema],
+
+    // EMBEDDED SHIPPING INFO
+    shipping_info: {
+      full_name: {
+        type: String,
+        required: true,
+      },
+
+      state: {
+        type: String,
+        required: true,
+      },
+
+      city: {
+        type: String,
+        required: true,
+      },
+
+      country: {
+        type: String,
+        required: true,
+      },
+
+      address: {
+        type: String,
+        required: true,
+      },
+
+      pincode: {
+        type: String,
+        required: true,
+      },
+
+      phone: {
+        type: String,
+        required: true,
+      },
+    },
 
     total_price: {
       type: Number,
@@ -56,7 +101,12 @@ const OrderSchema = new mongoose.Schema(
 
     order_status: {
       type: String,
-      enum: ["Processing", "Shipped", "Delivered", "Cancelled"],
+      enum: [
+        "Processing",
+        "Shipped",
+        "Delivered",
+        "Cancelled",
+      ],
       default: "Processing",
     },
 
@@ -70,19 +120,13 @@ const OrderSchema = new mongoose.Schema(
       ref: "Payment",
       default: null,
     },
-
-    shipping_info_id: {
-      type: String,
-      ref: "ShippingInfo",
-      default: null,
-    },
   },
   {
     timestamps: true,
   }
 );
 
-// Indexes for performance
+// INDEXES
 OrderSchema.index({ buyer_id: 1 });
 OrderSchema.index({ createdAt: 1 });
 OrderSchema.index({ paid_at: 1 });

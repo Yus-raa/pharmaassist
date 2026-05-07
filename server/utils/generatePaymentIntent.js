@@ -1,7 +1,5 @@
-import Stripe from "stripe";
+import stripe from "./stripe.js";
 import Payment from "../models/payment.js";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const generatePaymentIntent = async (orderId, totalPrice) => {
   try {
