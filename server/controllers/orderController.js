@@ -76,14 +76,23 @@ export const placeNewOrder = catchAsyncError(
         );
       }
 
-      if (item.quantity > product.stock) {
-        return next(
-          new ErrorHandler(
-            `Only ${product.stock} units available for ${product.name}`,
-            400
-          )
-        );
-      }
+      if (product.stock === 0) {
+      return next(
+        new ErrorHandler(
+          `${product.name} is currently out of stock.`,
+          400
+        )
+      );
+    }
+      
+    if (item.quantity > product.stock) {
+      return next(
+        new ErrorHandler(
+          `Only ${product.stock} units available for ${product.name}.`,
+          400
+        )
+      );
+    }
 
       const itemTotal = product.price * item.quantity;
 
@@ -167,6 +176,28 @@ export const placeNewOrder = catchAsyncError(
         paymentResponse.clientSecret,
 
       total_price,
+    });
+  }
+);
+
+// Fetch Single Order
+export const fetchSingleOrder = catchAsyncError(
+  async (req, res, next) => {
+
+    const { id } = req.params;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return next(
+        new ErrorHandler("Order not found.", 404)
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Order fetched successfully.",
+      order,
     });
   }
 );
