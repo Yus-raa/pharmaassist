@@ -115,6 +115,12 @@ const OrderSchema = new mongoose.Schema(
       default: null,
     },
 
+    payment_status: {
+      type: String,
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending",
+    },
+
     payment_id: {
       type: String,
       ref: "Payment",

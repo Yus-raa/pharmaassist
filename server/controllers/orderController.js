@@ -195,9 +195,7 @@ export const fetchSingleOrder = catchAsyncError(
     }
 
     // Only the buyer can access their order details
-    if (
-      order.buyer_id.toString() !== req.user._id.toString()
-    ) {
+    if (order.buyer_id !== req.user._id) {
       return next(
         new ErrorHandler(
           "Unauthorized to access this order.",
@@ -220,12 +218,190 @@ export const fetchMyOrders = catchAsyncError(
 
     const myOrders = await Order.find({
       buyer_id: req.user._id,
+      payment_status: "Paid",
+    }).sort({
+      createdAt: -1,
     });
 
     res.status(200).json({
       success: true,
       message: "All your orders fetched successfully.",
       myOrders,
+    });
+  }
+);
+
+// Fetch All Orders (Admin)
+export const fetchAllOrders = catchAsyncError(
+  async (req, res, next) => {
+
+    const orders = await Order.find({
+      payment_status: "Paid",
+    }).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "All paid orders fetched successfully.",
+      orders,
+    });
+  }
+);
+
+// Update Order Status (Admin)
+export const updateOrderStatus = catchAsyncError(
+  async (req, res, next) => {
+
+    const { status } = req.body;
+
+    if (!status) {
+      return next(
+        new ErrorHandler(
+          "Please provide order status.",
+          400
+        )
+      );
+    }
+
+    const allowedStatuses = [
+      "Processing",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+    ];
+
+    if (!allowedStatuses.includes(status)) {
+      return next(
+        new ErrorHandler(
+          "Invalid order status.",
+          400
+        )
+      );
+    }
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return next(
+        new ErrorHandler(
+          "Order not found.",
+          404
+        )
+      );
+    }
+
+    order.order_status = status;
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Order status updated successfully.",
+      order,
+    });
+  }
+);
+
+// Delete Order (Admin)
+export const deleteOrder = catchAsyncError(
+  async (req, res, next) => {
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return next(
+        new ErrorHandler(
+          "Order not found.",
+          404
+        )
+      );
+    }
+
+    await order.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Order deleted successfully.",
+      order,
+    });
+  }
+);
+
+// Mark Order As Paid
+export const markOrderAsPaid = catchAsyncError(
+  async (req, res, next) => {
+
+    const { payment_id } = req.body;
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return next(
+        new ErrorHandler(
+          "Order not found.",
+          404
+        )
+      );
+    }
+
+    // Prevent duplicate payment updates
+    if (order.payment_status === "Paid") {
+      return next(
+        new ErrorHandler(
+          "Order is already paid.",
+          400
+        )
+      );
+    }
+
+    // UPDATE PAYMENT INFO
+    order.payment_status = "Paid";
+
+    order.paid_at = new Date();
+
+    order.payment_id =
+      payment_id || "TEST_PAYMENT_ID";
+
+    // REDUCE PRODUCT STOCK
+    for (const item of order.order_items) {
+
+      const product = await Product.findById(
+        item.product_id
+      );
+
+      if (!product) {
+        return next(
+          new ErrorHandler(
+            `Product not found: ${item.product_id}`,
+            404
+          )
+        );
+      }
+
+      // Extra safety check
+      if (product.stock < item.quantity) {
+        return next(
+          new ErrorHandler(
+            `Insufficient stock for ${product.name}`,
+            400
+          )
+        );
+      }
+
+      product.stock -= item.quantity;
+
+      await product.save();
+    }
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Payment successful. Order marked as paid.",
+
+      order,
     });
   }
 );
