@@ -194,10 +194,38 @@ export const fetchSingleOrder = catchAsyncError(
       );
     }
 
+    // Only the buyer can access their order details
+    if (
+      order.buyer_id.toString() !== req.user._id.toString()
+    ) {
+      return next(
+        new ErrorHandler(
+          "Unauthorized to access this order.",
+          403
+        )
+      );
+    }
+
     res.status(200).json({
       success: true,
       message: "Order fetched successfully.",
       order,
+    });
+  }
+);
+
+// Fetch My Orders
+export const fetchMyOrders = catchAsyncError(
+  async (req, res, next) => {
+
+    const myOrders = await Order.find({
+      buyer_id: req.user._id,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "All your orders fetched successfully.",
+      myOrders,
     });
   }
 );
