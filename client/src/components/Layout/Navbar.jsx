@@ -41,7 +41,7 @@ const Navbar = () => {
         </div>
 
         {/* CENTER - SEARCH (DESKTOP) */}
-        <div className="hidden md:flex flex-1 mx-6">
+        <div className="hidden lg:flex flex-1 mx-6">
           <div
             onClick={() => dispatch(toggleSearchBar())}
             className="w-full flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800 cursor-pointer"
@@ -67,6 +67,14 @@ const Navbar = () => {
               <Moon size={20} />
             )}
           </button>
+
+          {/* MOBILE/TABLET SEARCH */}
+<button
+  onClick={() => dispatch(toggleSearchBar())}
+  className="lg:hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+>
+  <Search size={20} />
+</button>
 
           {/* CART */}
           <button
@@ -98,7 +106,7 @@ const Navbar = () => {
       </div>
 
       {/* MOBILE SEARCH BAR */}
-      <div className="md:hidden px-4 pb-3">
+      {/* <div className="md:hidden px-4 pb-3">
         <div
           onClick={() => dispatch(toggleSearchBar())}
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800"
@@ -108,7 +116,7 @@ const Navbar = () => {
             Search medicines...
           </span>
         </div>
-      </div>
+      </div> */}
     </nav>
   );
 };
