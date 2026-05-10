@@ -15,7 +15,7 @@
     --popover: 240 5% 6%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 220 100% 60%;
+    --primary: 142 72% 45%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4% 16%;
@@ -32,13 +32,13 @@
 
     --border: 240 4% 16%;
     --input: 240 4% 16%;
-    --ring: 220 100% 60%;
+    --ring: 142 72% 45%;
 
     --radius: 0.75rem;
 
     /* E-commerce specific colors */
-    --glass-bg: 220 100% 60% / 0.1;
-    --glass-border: 220 100% 60% / 0.2;
+    --glass-bg: 142 72% 45% / 0.08;
+    --glass-border: 142 72% 45% / 0.15;
     --glass-shadow: 220 100% 60% / 0.3;
     
     --gradient-primary: linear-gradient(135deg, hsl(220 100% 60%), hsl(217 91% 60%));

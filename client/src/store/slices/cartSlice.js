@@ -1,64 +1,68 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const initialState = {
+  cart: JSON.parse(localStorage.getItem("cart")) || [],
+};
+
+const saveCartToLocalStorage = (cart) => {
+  localStorage.setItem("cart", JSON.stringify(cart));
+};
+
 const cartSlice = createSlice({
   name: "cart",
 
-  initialState: {
-    cart: [],
-  },
+  initialState,
 
   reducers: {
-
-    // ADD ITEM TO CART
+    // ADD TO CART
     addToCart: (state, action) => {
-      const item = action.payload;
+      const { product, quantity = 1 } = action.payload;
 
       const existingItem = state.cart.find(
-        (i) => i._id === item._id
+        (item) => item._id === product._id
       );
 
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += quantity;
       } else {
         state.cart.push({
-          ...item,
-          quantity: 1,
+          ...product,
+          quantity,
         });
       }
+
+      saveCartToLocalStorage(state.cart);
     },
 
-    // REMOVE ITEM
+    // REMOVE FROM CART
     removeFromCart: (state, action) => {
       state.cart = state.cart.filter(
         (item) => item._id !== action.payload
       );
+
+      saveCartToLocalStorage(state.cart);
     },
 
-    // INCREASE QUANTITY
-    increaseQty: (state, action) => {
+    // UPDATE QUANTITY
+    updateCartQuantity: (state, action) => {
+      const { id, quantity } = action.payload;
+
       const item = state.cart.find(
-        (i) => i._id === action.payload
+        (item) => item._id === id
       );
 
       if (item) {
-        item.quantity += 1;
+        item.quantity = quantity;
       }
-    },
 
-    // DECREASE QUANTITY
-    decreaseQty: (state, action) => {
-      const item = state.cart.find(
-        (i) => i._id === action.payload
-      );
-
-      if (item && item.quantity > 1) {
-        item.quantity -= 1;
-      }
+      saveCartToLocalStorage(state.cart);
     },
 
     // CLEAR CART
     clearCart: (state) => {
       state.cart = [];
+
+      saveCartToLocalStorage([]);
     },
   },
 });
@@ -66,8 +70,7 @@ const cartSlice = createSlice({
 export const {
   addToCart,
   removeFromCart,
-  increaseQty,
-  decreaseQty,
+  updateCartQuantity,
   clearCart,
 } = cartSlice.actions;
 
