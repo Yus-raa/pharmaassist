@@ -9,6 +9,7 @@ const popupSlice = createSlice({
     isSearchBarOpen: false,
     isCartOpen: false,
     isAIPopupOpen: false,
+    isProfilePanelOpen: false,
   },
 
   reducers: {
@@ -43,6 +44,11 @@ const popupSlice = createSlice({
         !state.isAIPopupOpen;
     },
 
+    // Profile Panel
+    toggleProfilePanel: (state) => {
+      state.isProfilePanelOpen = !state.isProfilePanelOpen;
+    },
+
     // OPTIONAL CLOSE ALL
     closeAllPopups: (state) => {
       state.isAuthPopupOpen = false;
@@ -60,6 +66,7 @@ export const {
   toggleSearchBar,
   toggleCart,
   toggleAIModal,
+  toggleProfilePanel,
   closeAllPopups,
 } = popupSlice.actions;
 

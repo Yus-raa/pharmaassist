@@ -11,7 +11,7 @@ import {
 import { useTheme } from "../../contexts/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import { toggleSidebar, toggleCart, toggleSearchBar } from "../../store/slices/popupSlice";
+import { toggleSidebar, toggleCart, toggleSearchBar, toggleProfilePanel } from "../../store/slices/popupSlice";
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
@@ -91,7 +91,10 @@ const Navbar = () => {
           </button>
 
           {/* USER */}
-          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+          <button
+            onClick={() => dispatch(toggleProfilePanel())}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
             <User size={20} />
           </button>
 
