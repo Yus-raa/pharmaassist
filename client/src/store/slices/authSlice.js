@@ -303,16 +303,14 @@ const authSlice = createSlice({
 
 
   // ================= UPDATE PROFILE =================
-  builder
+   builder
     .addCase(updateProfile.pending, (state) => {
       state.isUpdatingProfile = true;
     })
-
     .addCase(updateProfile.fulfilled, (state, action) => {
       state.isUpdatingProfile = false;
       state.authUser = action.payload;
     })
-
     .addCase(updateProfile.rejected, (state) => {
       state.isUpdatingProfile = false;
     });

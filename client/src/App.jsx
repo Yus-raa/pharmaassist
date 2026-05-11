@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastContainer } from "react-toastify";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from "./store/slices/authSlice";
 
 // Layout Components
 import Navbar from "./components/Layout/Navbar";
@@ -24,6 +27,25 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
+  const {authUser, isCheckingAuth} = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+  dispatch(getUser());
+}, [dispatch]);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+          <p className="text-sm text-muted-foreground">
+            Loading your session...
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <>
       <ThemeProvider>

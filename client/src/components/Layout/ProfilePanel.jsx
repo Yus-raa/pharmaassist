@@ -23,6 +23,7 @@ const ProfilePanel = () => {
   const { isProfilePanelOpen } = useSelector(
     (state) => state.popup
   );
+  const { isUpdatingProfile } = useSelector((state) => state.auth);
 
   const { authUser } = useSelector(
     (state) => state.auth
@@ -201,11 +202,19 @@ const ProfilePanel = () => {
                 />
 
                 <button
-                  onClick={handleUpdateProfile}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl transition"
-                >
-                  Update Profile
-                </button>
+  onClick={handleUpdateProfile}
+  disabled={isUpdatingProfile}
+  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+>
+  {isUpdatingProfile ? (
+    <>
+      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      Updating...
+    </>
+  ) : (
+    "Update Profile"
+  )}
+</button>
               </div>
             </>
           )}
