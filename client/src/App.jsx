@@ -25,16 +25,22 @@ import About from "./pages/About";
 import FAQ from "./pages/FAQ";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import { fetchAllProducts } from "./store/slices/productSlice";
 
 const App = () => {
   const {authUser, isCheckingAuth} = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
-  useEffect(() => {
+const { loading: productLoading } = useSelector(
+  (state) => state.product
+);
+
+useEffect(() => {
   dispatch(getUser());
+  dispatch(fetchAllProducts({}));
 }, [dispatch]);
 
-  if (isCheckingAuth) {
+if (isCheckingAuth || productLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
