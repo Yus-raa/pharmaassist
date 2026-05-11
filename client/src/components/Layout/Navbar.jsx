@@ -11,12 +11,12 @@ import {
 import { useTheme } from "../../contexts/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import { toggleSidebar, toggleCart, toggleSearchBar, toggleProfilePanel } from "../../store/slices/popupSlice";
+import { toggleSidebar, toggleCart, toggleSearchBar, toggleProfilePanel, toggleAuthPopup } from "../../store/slices/popupSlice";
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const dispatch = useDispatch();
-
+  const { authUser } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
 
   const cartItemCount = cart.reduce(
@@ -91,12 +91,18 @@ const Navbar = () => {
           </button>
 
           {/* USER */}
-          <button
-            onClick={() => dispatch(toggleProfilePanel())}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            <User size={20} />
-          </button>
+<button
+  onClick={() => {
+    if (authUser) {
+      dispatch(toggleProfilePanel());
+    } else {
+      dispatch(toggleAuthPopup());
+    }
+  }}
+  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+>
+  <User size={20} />
+</button>
 
           {/* SIDEBAR MENU */}
           <button

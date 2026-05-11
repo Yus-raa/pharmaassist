@@ -97,20 +97,19 @@ export const logout = createAsyncThunk(
   "auth/logout",
   async (_, thunkAPI) => {
     try {
-      await axiosInstance.post(
-        "/auth/logout"
-      );
+      const response = await axiosInstance.get("/auth/logout");
 
-      toast.success("Logged out");
+      toast.success(response.data.message);
 
-      return null;
-
+      return response.data;
     } catch (error) {
-      toast.error("Logout failed");
+      const message =
+        error.response?.data?.message ||
+        "Logout failed";
 
-      return thunkAPI.rejectWithValue(
-        error.response?.data
-      );
+      toast.error(message);
+
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );
@@ -119,27 +118,24 @@ export const logout = createAsyncThunk(
 // ================= FORGOT PASSWORD =================
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
-  async (email, thunkAPI) => {
+  async (emailData, thunkAPI) => {
     try {
-      const res = await axiosInstance.post(
-        "/auth/password/forgot",
-        { email }
+      const response = await axiosInstance.post(
+        `/auth/password/forgot?frontendUrl=${window.location.origin}`,
+        emailData
       );
 
-      toast.success(res.data.message);
+      toast.success(response.data.message);
 
-      return res.data;
-
+      return response.data;
     } catch (error) {
       const message =
-  error.response?.data?.message ||
-  "Something went wrong, please try again.";
+        error.response?.data?.message ||
+        "Failed to send reset email";
 
-toast.error(message);
+      toast.error(message);
 
-      return thunkAPI.rejectWithValue(
-        message
-      );
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );

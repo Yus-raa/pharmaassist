@@ -6,7 +6,7 @@ import {
   User,
   Lock,
 } from "lucide-react";
-
+import defaultAvatar from "../../assets/default-avatar.png";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -34,7 +34,9 @@ const ProfilePanel = () => {
   const [email, setEmail] = useState("");
   const [avatar, setAvatar] = useState(null);
 
-  const [preview, setPreview] = useState("");
+  const [preview, setPreview] = useState(
+  authUser?.avatar?.url || defaultAvatar
+);
 
   const [currentPassword, setCurrentPassword] =
     useState("");
@@ -47,7 +49,9 @@ const ProfilePanel = () => {
     if (authUser) {
       setName(authUser.name || "");
       setEmail(authUser.email || "");
-      setPreview(authUser.avatar?.url || "");
+      setPreview(
+      authUser?.avatar?.url || defaultAvatar
+    );
     }
   }, [authUser]);
 
@@ -149,11 +153,14 @@ const ProfilePanel = () => {
             <>
               {/* AVATAR */}
               <div className="flex flex-col items-center">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-500">
+                <div className="w-24 h-24 rounded-full overflow-hidden ">
                   <img
-                    src={preview}
-                    alt="avatar"
-                    className="w-full h-full object-cover"
+                    src={preview || defaultAvatar}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover border-2 border-green-500"
+                    onError={(e) => {
+                      e.target.src = defaultAvatar;
+                    }}
                   />
                 </div>
 
