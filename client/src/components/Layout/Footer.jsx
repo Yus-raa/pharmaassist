@@ -3,81 +3,93 @@ import {
   Mail,
   Phone,
   MapPin,
+  ShieldCheck,
+  Activity,
   Facebook,
-  Twitter,
   Instagram,
-  Youtube,
+  Twitter,
 } from "lucide-react";
 
 const Footer = () => {
   const footerLinks = {
-    company: [
-      { name: "About Us", path: "/about" },
-      { name: "Careers", path: "#" },
-      { name: "Press", path: "#" },
+    platform: [
+      { name: "About PharmaAssist", path: "/about" },
+      { name: "AI Health Assistant", path: "#" },
+      { name: "Medication Guide", path: "#" },
       { name: "Blog", path: "#" },
     ],
-    customer: [
-      { name: "Contact Us", path: "/contact" },
-      { name: "FAQ", path: "/faq" },
-      { name: "Shipping Info", path: "#" },
-      { name: "Returns", path: "#" },
+    services: [
+      { name: "Order Medicines", path: "/products" },
+      { name: "Prescription Upload", path: "#" },
+      { name: "Track Orders", path: "/orders" },
+      { name: "Consult Pharmacist", path: "#" },
     ],
     legal: [
       { name: "Privacy Policy", path: "#" },
-      { name: "Terms of Service", path: "#" },
-      { name: "Cookie Policy", path: "#" },
-      { name: "Security", path: "#" },
+      { name: "Terms of Use", path: "#" },
+      { name: "Medical Disclaimer", path: "#" },
+      { name: "Data Security", path: "#" },
     ],
   };
 
   const socialLinks = [
     { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Twitter, href: "#", label: "Twitter" },
     { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Youtube, href: "#", label: "YouTube" },
+    { icon: Twitter, href: "#", label: "Twitter" },
   ];
 
   return (
-    <footer className="glass border-t border-[hsla(var(--glass-border))] mt-16">
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Brand & Contact */}
+    <footer className="bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 mt-16">
+      <div className="container mx-auto px-6 py-14">
+
+        {/* TOP GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
+          {/* BRAND */}
           <div className="lg:col-span-1">
-            <h2 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent mb-4">
-              ShopMate
+            <h2 className="text-2xl font-bold text-green-600 flex items-center gap-2">
+              <Activity className="w-6 h-6" />
+              PharmaAssist
             </h2>
-            <p className="text-muted-foreground mb-6">
-              Your trusted partner for online shopping. Discover amazing
-              products with exceptional quality and service.
+
+            <p className="text-gray-500 mt-4 text-sm leading-relaxed">
+              Your intelligent pharmacy companion for safe medicine ordering,
+              prescription management, and AI-powered health assistance.
             </p>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-muted-foreground">
-                <Mail className="w-5 h-5 text-primary" />
-                <span>support@shopmate.com</span>
+
+            <div className="mt-5 space-y-3 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-green-600" />
+                support@pharmaassist.com
               </div>
-              <div className="flex items-center space-x-3 text-muted-foreground">
-                <Phone className="w-5 h-5 text-primary" />
-                <span>+1 (555) 123-4567</span>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-green-600" />
+                +92 300 0000000
               </div>
-              <div className="flex items-center space-x-3 text-muted-foreground">
-                <MapPin className="w-5 h-5 text-primary" />
-                <span>San Francisco, CA</span>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-green-600" />
+                Karachi, Pakistan
               </div>
+            </div>
+
+            {/* TRUST BADGE */}
+            <div className="mt-5 flex items-center gap-2 text-xs text-green-600 bg-green-50 dark:bg-green-950/30 px-3 py-2 rounded-lg w-fit">
+              <ShieldCheck className="w-4 h-4" />
+              Verified Pharmacy Platform
             </div>
           </div>
 
-          {/* Company Links */}
+          {/* PLATFORM */}
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Company
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+              Platform
             </h3>
             <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
+              {footerLinks.platform.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.path}
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-gray-500 hover:text-green-600 text-sm transition"
                   >
                     {link.name}
                   </Link>
@@ -86,17 +98,17 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Customer Service */}
+          {/* SERVICES */}
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Customer Service
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+              Services
             </h3>
             <ul className="space-y-2">
-              {footerLinks.customer.map((link) => (
+              {footerLinks.services.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.path}
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-gray-500 hover:text-green-600 text-sm transition"
                   >
                     {link.name}
                   </Link>
@@ -105,17 +117,17 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* LEGAL */}
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Legal
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+              Legal & Safety
             </h3>
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.path}
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-gray-500 hover:text-green-600 text-sm transition"
                   >
                     {link.name}
                   </Link>
@@ -125,53 +137,50 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Newsletter Signup */}
-        <div className="glass-panel mb-12">
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Stay Connected
-            </h3>
-            <p className="text-muted-foreground">
-              Subscribe to our newsletter for exclusive offers and updates
-            </p>
-          </div>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+        {/* NEWSLETTER */}
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 mb-10 text-center">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Health Updates & Medicine Alerts
+          </h3>
+          <p className="text-gray-500 text-sm mt-1">
+            Get safe medicine alerts, health tips, and pharmacy updates
+          </p>
+
+          <form className="mt-4 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-4 py-3 bg-secondary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
+              className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm"
             />
             <button
               type="submit"
-              className="px-6 py-3 gradient-primary text-primary-foreground rounded-lg hover:glow-on-hover animate-smooth font-semibold"
+              className="px-5 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
             >
               Subscribe
             </button>
           </form>
         </div>
 
-        {/* Social Links & Copyright */}
-        <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-[hsla(var(--glass-border))]">
-          <div className="flex items-center space-x-4 mb-4 md:mb-0">
-            {socialLinks.map((social) => (
+        {/* BOTTOM */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-200 dark:border-gray-800">
+
+          {/* SOCIAL */}
+          <div className="flex items-center gap-3">
+            {socialLinks.map((s) => (
               <a
-                key={social.label}
-                href={social.href}
-                aria-label={social.label}
-                className="p-2 glass-card hover:glow-on-hover animate-smooth"
+                key={s.label}
+                href={s.href}
+                className="p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-green-500 transition"
               >
-                <social.icon className="w-5 h-5 text-primary" />
+                <s.icon className="w-4 h-4 text-green-600" />
               </a>
             ))}
           </div>
 
-          <div className="text-center md:text-right">
-            <p className="text-muted-foreground text-sm">
-              © 2024 ShopMate. All rights reserved.
-            </p>
-            <p className="text-muted-foreground text-xs mt-1">
-              Developed By CodeWithZeeshu
-            </p>
+          {/* COPYRIGHT */}
+          <div className="text-center md:text-right text-xs text-gray-500">
+            <p>© 2026 PharmaAssist. All rights reserved.</p>
+            <p className="mt-1">Built for safe and intelligent healthcare access</p>
           </div>
         </div>
       </div>
