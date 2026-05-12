@@ -36,7 +36,12 @@ const ProductSlider = ({ title, products = [] }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    dispatch(addToCart(product));
+    dispatch(
+  addToCart({
+    product,
+    quantity: 1,
+  })
+);
 
     toast.success(
       `${product.name} added to cart`
