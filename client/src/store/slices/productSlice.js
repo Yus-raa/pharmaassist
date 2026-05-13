@@ -156,14 +156,26 @@ export const fetchAIFilteredProducts =
 
 const initialState = {
   loading: false,
+
+  // PRODUCTS PAGE
   products: [],
-  productDetails: null,
   totalProducts: 0,
-  topRatedProducts: [],
+
+  // HOME PAGE
   newProducts: [],
+  topRatedProducts: [],
+
+  // DETAILS
+  productDetails: null,
+
+  // AI
+  aiProducts: [],
+
+  // FLAGS
   aiSearching: false,
   isReviewDeleting: false,
   isPostingReview: false,
+
   productReviews: [],
   error: null,
 };
