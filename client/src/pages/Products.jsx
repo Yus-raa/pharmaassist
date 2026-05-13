@@ -71,6 +71,12 @@ const Products = () => {
   const [isMobileFilterOpen, setIsMobileFilterOpen] =
     useState(false);
 
+  useEffect(() => {
+  setSearchQuery(query.get("search") || "");
+  setSelectedCategory(query.get("category") || "");
+  setCurrentPage(1);
+}, [location.search]);
+
   const {
     products,
     totalProducts,
@@ -161,14 +167,21 @@ const Products = () => {
           
           {/* SIDEBAR */}
           <aside
-            className={`fixed lg:sticky top-0 left-0 h-screen lg:h-fit w-[85%] sm:w-[350px] lg:w-full bg-white z-50 lg:z-auto border-r lg:border border-[#D6EEEE] lg:rounded-3xl p-6 shadow-xl lg:shadow-sm transition-transform duration-300
-              
-              ${
-                isMobileFilterOpen
-                  ? "translate-x-0"
-                  : "-translate-x-full lg:translate-x-0"
-              }`}
-          >
+  className={`fixed lg:sticky top-0 left-0 h-screen lg:h-fit 
+  overflow-y-auto
+  w-[85%] sm:w-[350px] lg:w-full 
+  bg-white z-50 lg:z-auto 
+  border-r lg:border border-[#D6EEEE] 
+  lg:rounded-3xl p-6 pb-24
+  shadow-xl lg:shadow-sm 
+  transition-transform duration-300
+  
+  ${
+    isMobileFilterOpen
+      ? "translate-x-0"
+      : "-translate-x-full lg:translate-x-0"
+  }`}
+>
             {/* Mobile Close */}
             <div className="flex items-center justify-between lg:hidden mb-6">
               <h2 className="text-xl font-bold">
@@ -324,37 +337,42 @@ const Products = () => {
           <main>
             
             {/* Search */}
-            <div className="flex flex-col md:flex-row gap-4 mb-8">
-              
-              {/* Search Input */}
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            {/* Smart Search Banner */}
+<div className="mb-8 rounded-3xl border border-[#D6EEEE] bg-gradient-to-r from-[#F0FAFA] to-white p-6 shadow-sm">
 
-                <input
-                  type="text"
-                  placeholder="Search medicines or healthcare products..."
-                  value={searchQuery}
-                  onChange={(e) =>
-                    setSearchQuery(
-                      e.target.value
-                    )
-                  }
-                  className="w-full rounded-2xl border border-[#D6EEEE] bg-white py-4 pl-12 pr-4 outline-none focus:ring-4 focus:ring-[#14B8A6]/10"
-                />
-              </div>
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
 
-              {/* AI Search */}
-              <button
-                onClick={() =>
-                  dispatch(toggleAIModal())
-                }
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[#0F766E] px-6 py-4 text-white font-semibold hover:bg-[#115E59] transition-all"
-              >
-                <Sparkles className="w-5 h-5" />
+    {/* LEFT */}
+    <div>
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-12 h-12 rounded-2xl bg-[#0F766E] flex items-center justify-center">
+          <Sparkles className="w-6 h-6 text-white" />
+        </div>
 
-                Smart Search
-              </button>
-            </div>
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">
+            AI Smart Search
+          </h2>
+
+          <p className="text-sm text-gray-500">
+            Find healthcare products naturally using symptoms,
+            conditions, or medicine names.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {/* BUTTON */}
+    <button
+      onClick={() => dispatch(toggleAIModal())}
+      className="h-fit flex items-center justify-center gap-2 rounded-2xl bg-[#0F766E] px-6 py-4 text-white font-semibold hover:bg-[#115E59] transition-all shadow-lg hover:shadow-xl"
+    >
+      <Sparkles className="w-5 h-5" />
+
+      Open Smart Search
+    </button>
+  </div>
+</div>
 
             {/* Products Count */}
             <div className="mb-6">

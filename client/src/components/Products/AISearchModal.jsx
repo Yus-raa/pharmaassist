@@ -6,7 +6,7 @@ import {
   Pill,
   Stethoscope,
 } from "lucide-react";
-
+import { useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -28,6 +28,7 @@ const AISearchModal = () => {
   const [userPrompt, setUserPrompt] = useState("");
 
   const dispatch = useDispatch();
+  const location = useLocation();
 
   const { aiSearching } = useSelector((state) => state.product);
 
@@ -46,6 +47,16 @@ const AISearchModal = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [dispatch]);
 
+  useEffect(() => {
+  const params = new URLSearchParams(location.search);
+
+  const search = params.get("search");
+
+  if (search) {
+    setUserPrompt(search);
+  }
+}, [location.search]);
+
   // Prevent rendering when modal closed
   if (!isAIPopupOpen) return null;
 
@@ -54,15 +65,19 @@ const AISearchModal = () => {
 
     if (!userPrompt.trim()) return;
 
-    await dispatch(fetchAIFilteredProducts(userPrompt));
+    await dispatch(
+  fetchAIFilteredProducts({
+    userPrompt,
+  })
+);
 
     dispatch(toggleAIModal());
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm p-4">
       {/* Modal */}
-      <div className="relative w-full max-w-2xl rounded-3xl bg-white shadow-2xl border border-[#D6EEEE] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-2xl mx-auto my-10 rounded-3xl bg-white shadow-2xl border border-[#D6EEEE] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Decorative Top Gradient */}
         <div className="h-2 bg-gradient-to-r from-[#0F766E] via-[#14B8A6] to-[#A6D6D6]" />

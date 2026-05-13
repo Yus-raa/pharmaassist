@@ -141,10 +141,6 @@ export const fetchAIFilteredProducts =
 
         return res.data;
       } catch (error) {
-        toast.error(
-          error.response?.data?.message ||
-            "Failed to fetch AI filtered products"
-        );
 
         return thunkAPI.rejectWithValue(
           error.response?.data?.message ||

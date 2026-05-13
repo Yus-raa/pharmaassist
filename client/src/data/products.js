@@ -24,14 +24,15 @@ export const categories = [
     id: "4",
     name: "Skincare",
     image:
-      "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=300",
+      "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=300",
+    
   },
 
   {
     id: "5",
     name: "Personal Care",
     image:
-      "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=300",
+      "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=300",
   },
 
   {

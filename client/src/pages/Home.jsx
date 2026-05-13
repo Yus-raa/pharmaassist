@@ -4,12 +4,28 @@ import CategoryGrid from "../components/Home/CategoryGrid";
 import ProductSlider from "../components/Home/ProductSlider";
 import FeatureSection from "../components/Home/FeatureSection";
 import NewsletterSection from "../components/Home/NewsletterSection";
-import { useSelector } from "react-redux";
+import { useEffect } from "react";
+
+//
+
+import {
+  useDispatch,
+  useSelector,
+} from "react-redux";
+
+import { fetchAllProducts } from "../store/slices/productSlice";
 
 const Index = () => {
-  const { topRatedProducts, newProducts } = useSelector(
-    (state) => state.product
-  );
+  const dispatch = useDispatch();
+
+  const { topRatedProducts, newProducts } =
+    useSelector((state) => state.product);
+
+  useEffect(() => {
+    dispatch(fetchAllProducts({}));
+  }, [dispatch]);
+
+//
   return (
     <div className="min-h-screen">
       <HeroSlider />
