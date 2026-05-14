@@ -63,35 +63,23 @@ export const fetchProductDetails = createAsyncThunk(
 // POST PRODUCT REVIEW
 export const postProductReview = createAsyncThunk(
   "product/postReview",
-  async (
-    { productId, rating, comment },
-    thunkAPI
-  ) => {
+  async ({ productId, rating, comment }, thunkAPI) => {
     try {
       const res = await axiosInstance.put(
         `/product/post-new/review/${productId}`,
-        {
-          rating,
-          comment,
-        }
+        { rating, comment }
       );
 
-      toast.success(
-        res.data.message ||
-          "Review posted successfully"
-      );
+      toast.success(res.data.message || "Review posted");
 
-      return res.data.review;
+      // RETURN ONLY PRODUCT ID (NOT REVIEW)
+      return {
+        productId,
+        success: true,
+      };
     } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to post review"
-      );
-
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message ||
-          "Failed to post review"
-      );
+      toast.error(error.response?.data?.message || "Failed");
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );

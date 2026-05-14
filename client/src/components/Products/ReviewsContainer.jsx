@@ -1,13 +1,8 @@
 import React, { useMemo, useState } from "react";
-import {
-  Star,
-  Trash2,
-  MessageSquareText,
-  ShieldCheck,
-} from "lucide-react";
-
+import { Star, Trash2, MessageSquareText, ShieldCheck } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-
+import defaultAvatar from "../../assets/default-avatar.png";
+import { fetchProductDetails } from "../../store/slices/productSlice";
 import {
   postProductReview,
   deleteProductReview,
@@ -15,46 +10,65 @@ import {
 
 const ReviewsContainer = ({ product, productReviews = [] }) => {
   const dispatch = useDispatch();
-
   const { authUser } = useSelector((state) => state.auth);
-
-  const { isPostingReview, isReviewDeleting } = useSelector(
-    (state) => state.product
-  );
+  const { isPostingReview } = useSelector((state) => state.product);
 
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  // Check if logged in user already reviewed
+  // SAFE normalization (prevents crashes)
+  const safeReviews = useMemo(() => {
+  return (productReviews || [])
+    .filter(Boolean)
+    .map((r, index) => ({
+      review_id: r.review_id || `temp-${index}`,
+      rating: r.rating || 0,
+      comment: r.comment || "",
+      reviewer: {
+        id: r?.reviewer?.id || "",
+        name: r?.reviewer?.name || "Anonymous User",
+        avatar: r?.reviewer?.avatar || null,
+      },
+    }));
+}, [productReviews]);
+
+  // check if user already reviewed
   const alreadyReviewed = useMemo(() => {
     if (!authUser) return false;
 
-    return productReviews.some(
-      (review) => review?.user?._id === authUser?._id
+    return safeReviews.some(
+      (r) => r.reviewer?.id === authUser?._id
     );
-  }, [authUser, productReviews]);
+  }, [authUser, safeReviews]);
 
-  // Handle submit review
+  // submit review
   const handleReviewSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!rating || !comment.trim()) return;
+  if (!product?._id || !rating || !comment.trim()) return;
 
-    await dispatch(
-      postProductReview({
-        productId: product._id,
-        rating,
-        comment,
-      })
-    );
+  const result = await dispatch(
+    postProductReview({
+      productId: product._id,
+      rating,
+      comment,
+    })
+  );
 
+  if (result.meta.requestStatus === "fulfilled") {
     setRating(0);
     setComment("");
-  };
 
-  // Handle delete review
+    // THIS IS 
+    dispatch(fetchProductDetails(product._id));
+  }
+};
+
+  // delete review
   const handleDeleteReview = async (reviewId) => {
+    if (!product?._id || !reviewId) return;
+
     await dispatch(
       deleteProductReview({
         productId: product._id,
@@ -65,7 +79,7 @@ const ReviewsContainer = ({ product, productReviews = [] }) => {
 
   return (
     <div className="mt-14">
-      {/* Section Header */}
+      {/* HEADER */}
       <div className="flex items-center gap-3 mb-8">
         <div className="w-12 h-12 rounded-2xl bg-[#E6F7F7] flex items-center justify-center">
           <MessageSquareText className="w-6 h-6 text-[#0F766E]" />
@@ -75,133 +89,91 @@ const ReviewsContainer = ({ product, productReviews = [] }) => {
           <h2 className="text-2xl font-bold text-gray-800">
             Customer Reviews
           </h2>
-
           <p className="text-sm text-gray-500">
             Trusted feedback from PharmaAssist customers
           </p>
         </div>
       </div>
 
-      {/* Review Form */}
+      {/* FORM */}
       {authUser && !alreadyReviewed && (
-        <div className="bg-white border border-[#D6EEEE] rounded-3xl p-6 shadow-sm mb-10">
-          <div className="flex items-center gap-2 mb-5">
+        <div className="bg-white border rounded-3xl p-6 mb-10">
+          <div className="flex items-center gap-2 mb-4">
             <ShieldCheck className="w-5 h-5 text-[#0F766E]" />
-
-            <h3 className="text-lg font-semibold text-gray-800">
-              Leave a Review
-            </h3>
+            <h3 className="font-semibold">Leave a Review</h3>
           </div>
 
-          <form onSubmit={handleReviewSubmit} className="space-y-5">
-            {/* Rating */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3">
-                Your Rating
-              </p>
-
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="transition-transform hover:scale-110"
-                  >
-                    <Star
-                      className={`w-7 h-7 ${
-                        star <= (hoverRating || rating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
+          <form onSubmit={handleReviewSubmit} className="space-y-4">
+            {/* stars */}
+            <div className="flex gap-1">
+              {[1,2,3,4,5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                >
+                  <Star
+                    className={`w-6 h-6 ${
+                      star <= (hoverRating || rating)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                </button>
+              ))}
             </div>
 
-            {/* Review Textarea */}
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-2">
-                Your Review
-              </label>
+            {/* comment */}
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Write your review..."
+              className="w-full border rounded-xl p-3"
+            />
 
-              <textarea
-                rows={5}
-                placeholder="Share your experience with this product..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="w-full rounded-2xl border border-[#D6EEEE] bg-[#FAFEFE] px-4 py-3 text-gray-700 placeholder:text-gray-400 outline-none transition-all resize-none focus:border-[#14B8A6] focus:ring-4 focus:ring-[#14B8A6]/10"
-              />
-            </div>
-
-            {/* Submit Button */}
             <button
               type="submit"
-              disabled={
-                isPostingReview || !rating || !comment.trim()
-              }
-              className={`w-full md:w-fit px-6 py-3 rounded-2xl font-semibold text-white transition-all duration-200
-              
-              ${
-                isPostingReview
-                  ? "bg-[#0F766E]/70 cursor-not-allowed"
-                  : "bg-[#0F766E] hover:bg-[#115E59] hover:shadow-lg"
-              }`}
+              disabled={isPostingReview}
+              className="px-5 py-2 bg-[#0F766E] text-white rounded-xl"
             >
-              {isPostingReview
-                ? "Submitting Review..."
-                : "Submit Review"}
+              {isPostingReview ? "Submitting..." : "Submit Review"}
             </button>
           </form>
         </div>
       )}
 
-      {/* Already Reviewed Message */}
-      {authUser && alreadyReviewed && (
-        <div className="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
-          <p className="text-sm text-emerald-700">
-            You have already reviewed this product.
-          </p>
-        </div>
-      )}
-
-      {/* Reviews List */}
+      {/* REVIEWS */}
       <div className="space-y-5">
-        {productReviews?.length > 0 ? (
-          productReviews.map((review) => {
-            const isAuthor =
-              authUser?._id === review?.user?._id;
+        {safeReviews.length > 0 ? (
+          safeReviews.map((review) => {
+            const reviewer = review.reviewer || {};
+            const isOwner = authUser?._id === reviewer.id;
 
             return (
               <div
-                key={review._id}
-                className="bg-white border border-[#D6EEEE] rounded-3xl p-6 shadow-sm"
+                key={review.review_id}
+                className="bg-white border rounded-2xl p-5"
               >
-                <div className="flex items-start justify-between gap-4">
-                  {/* Left */}
+                <div className="flex justify-between">
                   <div className="flex gap-4">
-                    {/* Avatar */}
                     <img
-                      src={
-                        review?.user?.avatar?.url ||
-                        "/default-avatar.png"
-                      }
-                      alt={review?.user?.name}
-                      className="w-14 h-14 rounded-full object-cover border border-[#D6EEEE]"
+                      src={reviewer.avatar?.url || defaultAvatar}
+                      alt={reviewer.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.src = defaultAvatar;
+                      }}
                     />
 
                     <div>
-                      {/* Name */}
-                      <h4 className="font-semibold text-gray-800">
-                        {review?.user?.name}
+                      <h4 className="font-semibold">
+                        {reviewer.name}
                       </h4>
 
-                      {/* Stars */}
-                      <div className="flex items-center gap-1 mt-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                      <div className="flex gap-1">
+                        {[1,2,3,4,5].map((star) => (
                           <Star
                             key={star}
                             className={`w-4 h-4 ${
@@ -213,27 +185,21 @@ const ReviewsContainer = ({ product, productReviews = [] }) => {
                         ))}
                       </div>
 
-                      {/* Comment */}
-                      <p className="text-gray-600 mt-3 leading-relaxed">
+                      <p className="text-gray-600 mt-2">
                         {review.comment}
                       </p>
                     </div>
                   </div>
 
-                  {/* Delete Review */}
-                  {isAuthor && (
+                  {/* DELETE */}
+                  {isOwner && (
                     <button
                       onClick={() =>
-                        handleDeleteReview(review._id)
+                        handleDeleteReview(review.review_id)
                       }
-                      disabled={isReviewDeleting}
-                      className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                      className="text-red-500"
                     >
                       <Trash2 className="w-4 h-4" />
-
-                      {isReviewDeleting
-                        ? "Deleting..."
-                        : "Delete"}
                     </button>
                   )}
                 </div>
@@ -241,20 +207,9 @@ const ReviewsContainer = ({ product, productReviews = [] }) => {
             );
           })
         ) : (
-          <div className="bg-white border border-dashed border-[#C7E8E8] rounded-3xl p-10 text-center">
-            <div className="w-16 h-16 mx-auto rounded-full bg-[#F0FAFA] flex items-center justify-center mb-4">
-              <MessageSquareText className="w-8 h-8 text-[#0F766E]" />
-            </div>
-
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              No Reviews Yet
-            </h3>
-
-            <p className="text-gray-500 max-w-md mx-auto">
-              Be the first customer to share your experience
-              with this healthcare product on PharmaAssist.
-            </p>
-          </div>
+          <p className="text-center text-gray-500">
+            No reviews yet
+          </p>
         )}
       </div>
     </div>

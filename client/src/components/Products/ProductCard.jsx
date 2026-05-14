@@ -162,10 +162,6 @@ const ProductCard = ({ product }) => {
                 {product?.ratings || 0}
               </span>
             </div>
-
-            <span className="text-xs text-gray-400">
-              ({product?.numOfReviews || 0})
-            </span>
           </div>
 
           <div className="text-xs text-gray-500">
