@@ -78,12 +78,12 @@ const Cart = () => {
 
   // CHECKOUT HANDLER
   const handleCheckout = () => {
-    if (!authUser) {
-      navigate("/login?redirect=/shipping");
-    } else {
-      navigate("/shipping");
-    }
-  };
+  if (!authUser) {
+    navigate("/login?redirect=/payment");
+  } else {
+    navigate("/payment");
+  }
+};
 
   // EMPTY CART
   if (cart.length === 0) {
