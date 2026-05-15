@@ -15,6 +15,7 @@ import Order from "./models/orders.js";
 import Product from "./models/product.js";
 import orderRouter from "./router/orderRoutes.js";
 import stripe from "./utils/stripe.js";
+import contactRouter from "./router/contactRoutes.js";
 const app = express();
 
 app.use(cors({
@@ -103,6 +104,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/product", productRoutes);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/order", orderRouter);
+app.use("/api/v1/contact",contactRouter);
 
 app.use(errorMiddleware);
 
