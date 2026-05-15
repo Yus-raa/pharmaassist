@@ -41,7 +41,7 @@ const Index = () => {
           />
         )}
         <FeatureSection />
-        <NewsletterSection />
+        {/* <NewsletterSection /> */}
       </div>
     </div>
   );

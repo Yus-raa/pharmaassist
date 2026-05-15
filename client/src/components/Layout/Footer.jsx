@@ -15,12 +15,10 @@ const Footer = () => {
     platform: [
       { name: "About PharmaAssist", path: "/about" },
       { name: "AI Health Assistant", path: "#" },
-      { name: "Medication Guide", path: "#" },
-      { name: "Blog", path: "#" },
+      
     ],
     services: [
       { name: "Order Medicines", path: "/products" },
-      { name: "Prescription Upload", path: "#" },
       { name: "Track Orders", path: "/orders" },
       { name: "Consult Pharmacist", path: "#" },
     ],
@@ -138,7 +136,7 @@ const Footer = () => {
         </div>
 
         {/* NEWSLETTER */}
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 mb-10 text-center">
+        {/* <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 mb-10 text-center">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Health Updates & Medicine Alerts
           </h3>
@@ -159,7 +157,7 @@ const Footer = () => {
               Subscribe
             </button>
           </form>
-        </div>
+        </div> */}
 
         {/* BOTTOM */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-200 dark:border-gray-800">
