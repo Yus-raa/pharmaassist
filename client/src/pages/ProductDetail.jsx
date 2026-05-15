@@ -83,6 +83,19 @@ const ProductDetail = () => {
     );
   };
 
+  // handle copy url
+  const handleCopyURL = () => {
+    const currentURL = window.location.href;
+    navigator.clipboard
+    .writeText(currentURL)
+    .then(() => {
+      toast.success("URL Copied", currentURL)
+    })
+    .catch((err) => {
+      console.error("Failed to Copy:", err)
+    })
+  }
+
   // LOADING UI
   if (loading) {
     return (
@@ -343,7 +356,7 @@ const ProductDetail = () => {
                 <Heart className="w-5 h-5 text-gray-700" />
               </button>
 
-              <button className="rounded-2xl border border-[#D6EEEE] px-5 py-4 hover:bg-[#F7FCFC] transition">
+              <button onClick={handleCopyURL} className="rounded-2xl border border-[#D6EEEE] px-5 py-4 hover:bg-[#F7FCFC] transition">
                 <Share2 className="w-5 h-5 text-gray-700" />
               </button>
             </div>

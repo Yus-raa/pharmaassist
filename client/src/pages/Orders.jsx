@@ -372,7 +372,7 @@ const Orders = () => {
                     </div>
 
                     {/* ACTIONS */}
-                    <div className="flex flex-wrap gap-3 mt-8 pt-6 border-t border-green-100">
+                    {/* <div className="flex flex-wrap gap-3 mt-8 pt-6 border-t border-green-100">
 
                       <Link
                         to={`/order/${order._id}`}
@@ -407,7 +407,7 @@ const Orders = () => {
                           Cancel Order
                         </button>
                       )}
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               )
