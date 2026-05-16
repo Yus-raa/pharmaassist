@@ -14,6 +14,7 @@ import Payment from "./models/payment.js";
 import Order from "./models/orders.js";
 import Product from "./models/product.js";
 import orderRouter from "./router/orderRoutes.js";
+import aiRouter from "./router/aiRoutes.js"
 import stripe from "./utils/stripe.js";
 import contactRouter from "./router/contactRoutes.js";
 const app = express();
@@ -105,6 +106,7 @@ app.use("/api/v1/product", productRoutes);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/order", orderRouter);
 app.use("/api/v1/contact",contactRouter);
+app.use("/api/v1/ai", aiRouter);
 
 app.use(errorMiddleware);
 
