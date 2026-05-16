@@ -1,155 +1,422 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import Product from "../models/product.js";
 import Fuse from "fuse.js";
+
 import { generateEmbedding } from "../utils/generateEmbedding.js";
 import { cosineSimilarity } from "../utils/cosineSimilarity.js";
 
-// ------------------------------
+// ==============================
 // 🧠 SYMPTOM INTELLIGENCE LAYER
-// ------------------------------
+// ==============================
 const symptomMap = {
-  headache: ["migraine", "dehydration", "stress", "fever"],
-  fever: ["infection", "viral", "cold"],
-  cough: ["cold", "allergy", "throat infection"],
-  stomach: ["gas", "acidity", "food poisoning"],
-  fatigue: ["anemia", "vitamin deficiency", "stress"],
+  headache: [
+    "migraine",
+    "dehydration",
+    "stress",
+    "fever",
+    "pain",
+  ],
+
+  fever: [
+    "infection",
+    "viral",
+    "cold",
+    "temperature",
+  ],
+
+  cough: [
+    "cold",
+    "allergy",
+    "throat infection",
+    "flu",
+    "dry cough",
+  ],
+
+  stomach: [
+    "gas",
+    "acidity",
+    "food poisoning",
+    "indigestion",
+  ],
+
+  fatigue: [
+    "anemia",
+    "vitamin deficiency",
+    "stress",
+    "weakness",
+  ],
 };
 
-// ------------------------------
+// ==============================
 // 🧠 CHAT RAG ENGINE
-// ------------------------------
-export const pharmaChatAI = catchAsyncError(async (req, res) => {
-  const { message } = req.body;
+// ==============================
+export const pharmaChatAI =
+  catchAsyncError(
+    async (req, res) => {
 
-  if (!message) {
-    return res.status(400).json({
-      success: false,
-      message: "Message is required",
-    });
-  }
+      const { message } = req.body;
 
-  const query = message.toLowerCase();
+      // ==========================
+      // VALIDATION
+      // ==========================
+      if (!message) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Message is required",
+        });
+      }
 
-  // ============================
-  // 1. FETCH ALL PRODUCTS
-  // ============================
-  const allProducts = await Product.find();
+      const query =
+        message.toLowerCase().trim();
 
-  // ============================
-  // 2. FUZZY SEARCH LAYER
-  // ============================
-  const fuse = new Fuse(allProducts, {
-    keys: ["name", "description", "symptoms", "useCases", "category"],
-    threshold: 0.35,
-  });
+      // ==========================
+      // FETCH PRODUCTS
+      // ==========================
+      const allProducts =
+        await Product.find();
 
-  const fuzzyResults = fuse.search(query).map(r => r.item);
+      if (
+        !allProducts ||
+        allProducts.length === 0
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "No medicines available right now.",
+        });
+      }
 
-  // ============================
-  // 3. SYMPTOM EXPANSION LAYER
-  // ============================
-  let expanded = [];
+      // ==========================
+      // FUZZY SEARCH
+      // ==========================
+      const fuse = new Fuse(
+        allProducts,
+        {
+          keys: [
+            "name",
+            "description",
+            "symptoms",
+            "useCases",
+            "category",
+          ],
 
-  Object.keys(symptomMap).forEach((symptom) => {
-    if (query.includes(symptom)) {
-      expanded.push(...symptomMap[symptom]);
-    }
-  });
+          threshold: 0.3,
 
-  // ============================
-  // 4. KEYWORD FILTER LAYER
-  // ============================
-  const keywordProducts = allProducts.filter((p) => {
-    const text = `
-      ${p.name}
-      ${p.description}
-      ${(p.symptoms || []).join(" ")}
-      ${(p.useCases || []).join(" ")}
-    `.toLowerCase();
+          includeScore: true,
 
-    return expanded.some((w) => text.includes(w));
-  });
+          minMatchCharLength: 2,
+        }
+      );
 
-  // ============================
-  // 5. MERGE RESULTS
-  // ============================
-  const map = new Map();
+      const fuzzyResults =
+        fuse.search(query);
 
-  [...fuzzyResults, ...keywordProducts].forEach((p) => {
-    map.set(p._id.toString(), p);
-  });
+      // ==========================
+      // SYMPTOM EXPANSION
+      // ==========================
+      let expandedKeywords = [];
 
-  let baseProducts = Array.from(map.values());
+      Object.keys(symptomMap).forEach(
+        (symptom) => {
 
-  if (baseProducts.length === 0) {
-    baseProducts = allProducts.slice(0, 10);
-  }
+          if (
+            query.includes(symptom)
+          ) {
+            expandedKeywords.push(
+              symptom
+            );
 
-  // ============================
-  // 6. VECTOR RANKING (YOUR SYSTEM)
-  // ============================
-  const queryEmbedding = await generateEmbedding(query);
+            expandedKeywords.push(
+              ...symptomMap[
+                symptom
+              ]
+            );
+          }
+        }
+      );
 
-  const ranked = baseProducts
-    .map((p) => {
-      if (!p.embeddings) return null;
+      expandedKeywords = [
+        ...new Set(
+          expandedKeywords
+        ),
+      ];
 
-      const similarity = cosineSimilarity(queryEmbedding, p.embeddings);
+      // ==========================
+      // KEYWORD FILTER
+      // ==========================
+      const keywordProducts =
+        allProducts.filter(
+          (p) => {
 
-      // boost logic (VERY IMPORTANT)
-      let boost = 0;
+            const searchableText = `
+              ${p.name || ""}
+              ${p.description || ""}
+              ${(p.symptoms || []).join(
+                " "
+              )}
+              ${(p.useCases || []).join(
+                " "
+              )}
+              ${p.category || ""}
+            `.toLowerCase();
 
-      (p.symptoms || []).forEach((s) => {
-        if (query.includes(s)) boost += 0.08;
-      });
+            return expandedKeywords.some(
+              (keyword) =>
+                searchableText.includes(
+                  keyword
+                )
+            );
+          }
+        );
 
-      (p.useCases || []).forEach((u) => {
-        if (query.includes(u)) boost += 0.08;
-      });
+      // ==========================
+      // MERGE + DEDUPE
+      // ==========================
+      const productMap =
+        new Map();
 
-      return {
-        _id: p._id,
-        name: p.name,
-        description: p.description,
-        price: p.price,
-        category: p.category,
-        images: p.images,
-        symptoms: p.symptoms,
-        useCases: p.useCases,
-        score: similarity + boost,
+      // FUZZY RESULTS
+      fuzzyResults.forEach(
+        (result) => {
+
+          // reject weak fuzzy matches
+          if (
+            result.score > 0.45
+          )
+            return;
+
+          productMap.set(
+            result.item._id.toString(),
+            result.item
+          );
+        }
+      );
+
+      // KEYWORD RESULTS
+      keywordProducts.forEach(
+        (product) => {
+
+          productMap.set(
+            product._id.toString(),
+            product
+          );
+        }
+      );
+
+      const baseProducts =
+        Array.from(
+          productMap.values()
+        );
+
+      // ==========================
+      // 🚫 IMPORTANT FIX
+      // NO FALLBACK TO ALL PRODUCTS
+      // ==========================
+      if (
+        baseProducts.length === 0
+      ) {
+
+        return res.json({
+          success: true,
+
+          data: {
+            reply:
+              "I couldn't find any relevant medicines for your symptoms/query right now.",
+
+            possibleConditions:
+              Object.keys(
+                symptomMap
+              ).filter((k) =>
+                query.includes(k)
+              ),
+
+            recommendations: [],
+
+            disclaimer:
+              "This AI assistant only suggests medicines when relevant matches are available.",
+          },
+        });
+      }
+
+      // ==========================
+      // VECTOR SEARCH
+      // ==========================
+      const queryEmbedding =
+        await generateEmbedding(
+          query
+        );
+
+      const ranked =
+        baseProducts
+          .map((p) => {
+
+            if (
+              !p.embeddings
+            )
+              return null;
+
+            let similarity =
+              cosineSimilarity(
+                queryEmbedding,
+                p.embeddings
+              );
+
+            // ======================
+            // BOOSTING SYSTEM
+            // ======================
+            let boost = 0;
+
+            // symptom boosts
+            (
+              p.symptoms || []
+            ).forEach((s) => {
+
+              if (
+                query.includes(
+                  s.toLowerCase()
+                )
+              ) {
+                boost += 0.12;
+              }
+            });
+
+            // usecase boosts
+            (
+              p.useCases || []
+            ).forEach((u) => {
+
+              if (
+                query.includes(
+                  u.toLowerCase()
+                )
+              ) {
+                boost += 0.12;
+              }
+            });
+
+            // category boosts
+            if (
+              p.category &&
+              query.includes(
+                p.category.toLowerCase()
+              )
+            ) {
+              boost += 0.08;
+            }
+
+            const finalScore =
+              similarity + boost;
+
+            return {
+              _id: p._id,
+
+              name: p.name,
+
+              description:
+                p.description,
+
+              price: p.price,
+
+              category:
+                p.category,
+
+              images: p.images,
+
+              symptoms:
+                p.symptoms,
+
+              useCases:
+                p.useCases,
+
+              score:
+                finalScore,
+            };
+          })
+
+          .filter(Boolean)
+
+          // reject weak vector matches
+          .filter(
+            (p) => p.score >= 0.35
+          )
+
+          .sort(
+            (a, b) =>
+              b.score - a.score
+          );
+
+      // ==========================
+      // FINAL SAFETY CHECK
+      // ==========================
+      if (
+        ranked.length === 0
+      ) {
+
+        return res.json({
+          success: true,
+
+          data: {
+            reply:
+              "No medically relevant products were found for your query.",
+
+            possibleConditions:
+              Object.keys(
+                symptomMap
+              ).filter((k) =>
+                query.includes(k)
+              ),
+
+            recommendations: [],
+
+            disclaimer:
+              "Please consult a healthcare professional for proper medical advice.",
+          },
+        });
+      }
+
+      // ==========================
+      // LIMIT RESULTS
+      // ==========================
+      const topResults =
+        ranked.slice(0, 6);
+
+      // ==========================
+      // RESPONSE
+      // ==========================
+      const response = {
+
+        reply: `I found ${topResults.length} relevant medical option${
+          topResults.length > 1
+            ? "s"
+            : ""
+        } based on your symptoms/query.`,
+
+        possibleConditions:
+          Object.keys(
+            symptomMap
+          ).filter((k) =>
+            query.includes(k)
+          ),
+
+        recommendations: topResults.map((p) => ({
+  _id: p._id,
+  name: p.name,
+  description: p.description,
+  price: p.price,
+  images: p.images,
+  category: p.category,
+  symptoms: p.symptoms,
+  useCases: p.useCases,
+})),
+
+        disclaimer:
+          "This is an AI-assisted suggestion and not a medical diagnosis. Please consult a doctor before taking medication.",
       };
-    })
-    .filter(Boolean)
-    .sort((a, b) => b.score - a.score);
 
-  const topResults = ranked.slice(0, 6);
-
-  // ============================
-  // 7. RAG RESPONSE FORMAT
-  // ============================
-  const response = {
-    reply: `I found ${topResults.length} relevant medical options based on your symptoms/query.`,
-
-    possibleConditions: Object.keys(symptomMap).filter((k) =>
-      query.includes(k)
-    ),
-
-    recommendations: topResults.map((p) => ({
-      id: p._id,
-      name: p.name,
-      description: p.description,
-      price: p.price,
-      image: p.images?.[0]?.url,
-      symptoms: p.symptoms,
-      useCases: p.useCases,
-    })),
-
-    disclaimer:
-      "This is an AI-assisted suggestion. Please consult a doctor for medical confirmation.",
-  };
-
-  res.json({
-    success: true,
-    data: response,
-  });
-});
+      res.json({
+        success: true,
+        data: response,
+      });
+    }
+  );
