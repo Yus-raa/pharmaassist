@@ -15,6 +15,7 @@ import CartSidebar from "./components/Layout/CartSidebar";
 import ProfilePanel from "./components/Layout/ProfilePanel";
 import LoginModal from "./components/Layout/LoginModal";
 import Footer from "./components/Layout/Footer";
+import PharmaAIChat from "./components/AI/PharmaAIChat";
 
 // Pages
 import Home from "./pages/Home";
@@ -87,6 +88,7 @@ const App = () => {
           </main>
 
           <Footer />
+          <PharmaAIChat />
         </div>
 
         <ToastContainer />

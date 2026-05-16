@@ -1,117 +1,123 @@
-import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  Search,
+  Bot,
+  Pill,
+  Package,
+  Sparkles,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const HeroSlider = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
 
-  const slides = [
-    {
-      id: 1,
-      title: "Premium Electronics",
-      subtitle: "Discover the latest tech innovations",
-      description:
-        "Up to 50% off on premium headphones, smartwatches, and more",
-      image: "./electronics.jpg",
-      cta: "Shop Electronics",
-      url: "/products?category=Electronics",
-    },
-    {
-      id: 2,
-      title: "Fashion Forward",
-      subtitle: "Style meets comfort",
-      description: "New arrivals in designer clothing and accessories",
-      image: "./fashion.jpg",
-      cta: "Explore Fashion",
-      url: "/products?category=Fashion",
-    },
-    {
-      id: 3,
-      title: "Home & Garden",
-      subtitle: "Transform your space",
-      description: "Beautiful furniture and decor for every home",
-      image: "./furniture.jpg",
-      cta: "Shop Home",
-      url: `/products?category=Home & Garden`,
-    },
-  ];
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 8000);
-    return () => clearInterval(timer);
-  }, []);
+const HeroSection = () => {
+  const [query, setQuery] = useState("");
+  
+const navigate = useNavigate();
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // later we will connect this to AI + product search
+    console.log("AI Query:", query);
   };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
-  const slide = slides[currentSlide];
 
   return (
-    <div className="relative h-[70vh] overflow-hidden rounded-2xl">
-      {/* Single Active Slide */}
-      <div className="relative h-full">
-        <div className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
-          style={{ backgroundImage: `url(${slide.image})` }}
-        />
-        <div className="absolute inset-0 glass" />
-        <div className="relative h-full flex items-center justify-center text-center px-6">
-          <div className="max-w-3xl animate-fade-in-up">
-            <h3 className="text-lg font-medium text-primary mb-2">
-              {slide.subtitle}
-            </h3>
-            <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-4">
-              {slide.title}
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              {slide.description}
-            </p>
-            <Link
-              to={slide.url}
-              className="px-8 py-4 gradient-primary text-primary-foreground rounded-lg hover:glow-on-hover animate-smooth font-semibold text-lg"
-            >
-              {slide.cta}
-            </Link>
-          </div>
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-50 via-white to-blue-50 border border-green-100">
+
+      {/* background glow */}
+      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top_right,rgba(34,197,94,0.15),transparent_60%)]" />
+
+      <div className="relative px-6 md:px-16 py-20">
+
+        {/* top badge */}
+        <div className="flex items-center gap-2 text-green-700 mb-4">
+          <Sparkles className="w-4 h-4" />
+          <span className="text-sm font-medium">
+            AI Powered Healthcare Assistant
+          </span>
         </div>
-      </div>
 
-      {/* Arrows */}
-      <button
-        onClick={prevSlide}
-        className="hidden sm:block absolute left-6 top-1/2 transform -translate-y-1/2 p-3 glass-card hover:glow-on-hover animate-smooth"
-      >
-        <ChevronLeft className="w-6 h-6 text-primary" />
-      </button>
-      <button
-        onClick={nextSlide}
-        className="hidden sm:block absolute right-6 top-1/2 transform -translate-y-1/2 p-3 glass-card hover:glow-on-hover animate-smooth"
-      >
-        <ChevronRight className="w-6 h-6 text-primary" />
-      </button>
+        {/* main heading */}
+        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight max-w-3xl">
+          Your Personal <span className="text-green-600">Pharmacy AI</span> for
+          smarter healthcare decisions
+        </h1>
 
-      {/* Dots */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentSlide
-                ? "bg-primary glow-primary"
-                : "bg-white/30 hover:bg-white/50"
-            }`}
-          />
-        ))}
+        <p className="text-gray-600 mt-5 max-w-2xl text-lg">
+          Search medicines, understand symptoms, manage prescriptions, and get
+          guided healthcare support — all in one intelligent system.
+        </p>
+
+        {/* AI search bar (core feature placeholder) */}
+        <div className="mt-10 flex justify-start">
+  <button
+    onClick={() => navigate("/?ai=open")}
+    className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-green-600 text-white font-semibold text-lg shadow-lg hover:bg-green-700 transition"
+  >
+    <Bot className="w-5 h-5" />
+    Ask PharmaAssist AI
+  </button>
+</div>
+
+        {/* quick actions */}
+<div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+
+  <Link
+    to="/products"
+    className="group p-5 bg-white/90 backdrop-blur rounded-2xl border border-emerald-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300"
+  >
+    <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center mb-3">
+      <Pill className="w-5 h-5 text-emerald-600" />
+    </div>
+
+    <h3 className="font-semibold text-slate-800 group-hover:text-emerald-700 transition">
+      Browse Medicines
+    </h3>
+
+    <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+      Find OTC medicines, supplements, and healthcare essentials.
+    </p>
+  </Link>
+
+  <Link
+    to="/orders"
+    className="group p-5 bg-white/90 backdrop-blur rounded-2xl border border-emerald-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300"
+  >
+    <div className="w-11 h-11 rounded-xl bg-cyan-100 flex items-center justify-center mb-3">
+      <Package className="w-5 h-5 text-cyan-600" />
+    </div>
+
+    <h3 className="font-semibold text-slate-800 group-hover:text-cyan-700 transition">
+      Track Orders
+    </h3>
+
+    <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+      Monitor deliveries, payment updates, and order history.
+    </p>
+  </Link>
+
+  <button
+    onClick={() => navigate("/?ai=open")}
+    className="group text-left p-5 bg-white/90 backdrop-blur rounded-2xl border border-emerald-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300"
+  >
+    <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center mb-3">
+      <Bot className="w-5 h-5 text-violet-600" />
+    </div>
+
+    <h3 className="font-semibold text-slate-800 group-hover:text-violet-700 transition">
+      PharmaAssist AI
+    </h3>
+
+    <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+      Chat with AI for symptom guidance and medicine suggestions.
+    </p>
+  </button>
+
+</div>
       </div>
     </div>
   );
 };
 
-export default HeroSlider;
+export default HeroSection;
