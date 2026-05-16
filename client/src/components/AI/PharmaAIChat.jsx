@@ -177,54 +177,64 @@ const PharmaAIChat = () => {
       {/* ========================= */}
 
       <button
-        onClick={() =>
-          setIsOpen(true)
-        }
-        className="
-          fixed
-          bottom-5
-          right-5
-          z-[999]
-          group
-          flex
-          items-center
-          gap-3
-          rounded-full
-          bg-gradient-to-r
-          from-emerald-500
-          to-green-600
-          px-5
-          py-4
-          shadow-2xl
-          hover:scale-105
-          transition-all
-          duration-300
-        "
-      >
-        <div
-          className="
-            flex
-            items-center
-            justify-center
-            w-10
-            h-10
-            rounded-full
-            bg-white/20
-          "
-        >
-          <Bot className="w-5 h-5 text-white" />
-        </div>
+  onClick={() => setIsOpen(true)}
+  className="
+    fixed
+    bottom-5
+    right-5
+    z-40
+    group
+    flex
+    items-center
+    overflow-hidden
+    rounded-full
+    bg-gradient-to-r
+    from-emerald-500
+    to-green-600
+    shadow-2xl
+    transition-all
+    duration-300
+    hover:pr-5
+    hover:scale-105
+  "
+>
+  {/* ICON */}
+  <div
+    className="
+      flex
+      items-center
+      justify-center
+      w-14
+      h-14
+      rounded-full
+      shrink-0
+    "
+  >
+    <Bot className="w-6 h-6 text-white" />
+  </div>
 
-        <div className="hidden sm:block text-left">
-          <p className="text-white font-semibold text-sm">
-            PharmaAssist AI
-          </p>
+  {/* EXPANDING CONTENT */}
+  <div
+    className="
+      max-w-0
+      overflow-hidden
+      whitespace-nowrap
+      transition-all
+      duration-300
+      group-hover:max-w-xs
+    "
+  >
+    <div className="pr-2">
+      <p className="text-white font-semibold text-sm">
+        PharmaAssist AI
+      </p>
 
-          <p className="text-white/80 text-xs">
-            Smart Medical Assistant
-          </p>
-        </div>
-      </button>
+      <p className="text-white/80 text-xs">
+        Smart Medical Assistant
+      </p>
+    </div>
+  </div>
+</button>
 
       {/* ========================= */}
       {/* CHAT MODAL */}
@@ -563,9 +573,7 @@ const PharmaAIChat = () => {
                                     item
                                   ) => (
                                     <div
-                                      key={
-                                        item.id
-                                      }
+                                      key={item._id}
                                       className="
                                         bg-[#F9FFFC]
                                         border
@@ -578,9 +586,7 @@ const PharmaAIChat = () => {
                                       "
                                     >
                                       <img
-                                        src={
-                                          item.image
-                                        }
+                                        src={item.images?.[0]?.url}
                                         alt={
                                           item.name
                                         }

@@ -48,11 +48,11 @@ const Sidebar = () => {
       path: "/products",
     },
 
-    {
-      name: "Health Categories",
-      icon: HeartPulse,
-      path: "/categories",
-    },
+    // {
+    //   name: "Health Categories",
+    //   icon: HeartPulse,
+    //   path: "/categories",
+    // },
 
     {
       name: "About",

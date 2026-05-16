@@ -57,7 +57,7 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
 
           {/* THEME TOGGLE */}
-          <button
+          {/* <button
             onClick={toggleTheme}
             className="p-2 rounded-full hover:bg-gray-100  dark:hover:bg-gray-800"
           >
@@ -66,7 +66,7 @@ const Navbar = () => {
             ) : (
               <Moon size={20} />
             )}
-          </button>
+          </button> */}
 
           {/* MOBILE/TABLET SEARCH */}
 <button
