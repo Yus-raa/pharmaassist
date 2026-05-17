@@ -25,7 +25,7 @@ const Header = () => {
         {/* MOBILE MENU BUTTON */}
         <button
           onClick={() => dispatch(toggleNavbar())}
-          className="lg:hidden bg-[#EAF4F4] hover:bg-[#d8efef] p-2 rounded-lg transition"
+          className=" bg-[#EAF4F4] hover:bg-[#d8efef] p-2 rounded-lg transition"
         >
           <Menu className="w-5 h-5 text-[#0F766E]" />
         </button>

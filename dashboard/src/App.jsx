@@ -37,7 +37,7 @@ function App() {
 
   const renderDashboardContent = () => {
   switch (openedComponent) {
-    case "Dashboardd":
+    case "Dashboard":
       return <Dashboard />;
 
     case "Orders":
@@ -53,7 +53,7 @@ function App() {
       return <Products />;
 
     default:
-      return <Profile />;
+      return <Dashboard />;
   }
 };
 

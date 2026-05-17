@@ -1,153 +1,190 @@
-// import React, { useState, useEffect } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { toggleUpdateProductModal } from "../store/slices/extraSlice";
-// import { LoaderCircle } from "lucide-react";
-// import { updateProduct } from "../store/slices/productsSlice";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { LoaderCircle, X, UploadCloud } from "lucide-react";
+import { toggleUpdateProductModal } from "../store/slices/extraSlice";
+import { updateProduct } from "../store/slices/productsSlice";
 
-// const UpdateProductModal = ({ selectedProduct }) => {
-//   const { loading } = useSelector((state) => state.product);
-//   const dispatch = useDispatch();
+const UpdateProductModal = ({ selectedProduct }) => {
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.product);
 
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     description: "",
-//     price: "",
-//     category: "",
-//     stock: "",
-//   });
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    stock: "",
+    images: [],
+  });
 
-//   const categoryOptions = [
-//     "Electronics",
-//     "Fashion",
-//     "Home & Garden",
-//     "Sports",
-//     "Books",
-//     "Beauty",
-//     "Automotive",
-//     "Kids & Baby",
-//   ];
+  const categoryOptions = [
+    "Pain Relief",
+    "Cold & Flu",
+    "Vitamins & Supplements",
+    "Skincare",
+    "Personal Care",
+    "Medical Devices",
+    "Diabetes Care",
+    "Baby Care",
+  ];
 
-//   useEffect(() => {
-//     if (selectedProduct) {
-//       console.log(selectedProduct);
-//       setFormData({
-//         name: selectedProduct.name || "",
-//         description: selectedProduct.description || "",
-//         price: selectedProduct.price || "",
-//         category: selectedProduct.category || "",
-//         stock: selectedProduct.stock || "",
-//       });
-//     }
-//   }, [selectedProduct]);
+  // Fill form when product changes
+  useEffect(() => {
+    if (selectedProduct) {
+      setFormData({
+        name: selectedProduct.name || "",
+        description: selectedProduct.description || "",
+        price: selectedProduct.price || "",
+        category: selectedProduct.category || "",
+        stock: selectedProduct.stock || "",
+        images: [],
+      });
+    }
+  }, [selectedProduct]);
 
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
-//     const data = {
-//       name: formData.name,
-//       description: formData.description,
-//       price: formData.price,
-//       category: formData.category,
-//       stock: formData.stock,
-//     };
+  const handleFileChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: Array.from(e.target.files),
+    }));
+  };
 
-//     dispatch(updateProduct(data, selectedProduct.id));
-//   };
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-//   return (
-//     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center p-4">
-//       <div className="bg-white rounded-xl w-full max-w-2xl p-6 relative">
-//         <button
-//           onClick={() => dispatch(toggleUpdateProductModal())}
-//           className="absolute top-4 right-4 text-gray-600 hover:text-red-500 text-xl"
-//         >
-//           &times;
-//         </button>
-//         <h2 className="text-2xl font-bold mb-4 text-center">Update Product</h2>
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("description", formData.description);
+    data.append("price", formData.price);
+    data.append("category", formData.category);
+    data.append("stock", formData.stock);
 
-//         <form
-//           className="grid grid-cols-1 md:grid-cols-2 gap-4"
-//           onSubmit={handleSubmit}
-//         >
-//           <input
-//             type="text"
-//             placeholder="Title"
-//             value={formData.name}
-//             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-//             className="border px-4 py-2 rounded"
-//           />
-//           <select
-//             className="w-full border p-2 rounded-lg"
-//             value={formData.category}
-//             onChange={(e) =>
-//               setFormData({ ...formData, category: e.target.value })
-//             }
-//             required
-//           >
-//             {categoryOptions.map((cat, idx) => (
-//               <option key={idx} value={cat}>
-//                 {cat}
-//               </option>
-//             ))}
-//           </select>
-//           <input
-//             type="number"
-//             placeholder="Price"
-//             value={formData.price}
-//             onChange={(e) =>
-//               setFormData({ ...formData, price: e.target.value })
-//             }
-//             className="border px-4 py-2 rounded"
-//           />
-//           <input
-//             type="number"
-//             placeholder="Stock"
-//             value={formData.stock}
-//             onChange={(e) =>
-//               setFormData({ ...formData, stock: e.target.value })
-//             }
-//             className="border px-4 py-2 rounded"
-//           />
+    // only send images if admin selects new ones
+    formData.images.forEach((img) => {
+      data.append("images", img);
+    });
 
-//           <textarea
-//             placeholder="Description"
-//             value={formData.description}
-//             onChange={(e) =>
-//               setFormData({ ...formData, description: e.target.value })
-//             }
-//             className="border px-4 py-2 rounded col-span-1 md:col-span-2"
-//             rows={4}
-//           />
+    dispatch(updateProduct(selectedProduct._id, data));
+  };
 
-//           <button
-//             type="submit"
-//             className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded col-span-1 md:col-span-2"
-//           >
-//             {loading ? (
-//               <>
-//                 <LoaderCircle className="w-6 h-6 animate-spin" />
-//                 Updating
-//               </>
-//             ) : (
-//               "Update Product"
-//             )}
-//           </button>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
+  if (!selectedProduct) return null;
 
-// export default UpdateProductModal;
-
-import React from 'react'
-
-const UpdateProductModal = () => {
   return (
-    <div>
-      
-    </div>
-  )
-}
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 relative border border-green-100">
 
-export default UpdateProductModal
+        {/* Close button */}
+        <button
+          onClick={() => dispatch(toggleUpdateProductModal())}
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-red-100 transition"
+        >
+          <X className="w-5 h-5 text-red-500" />
+        </button>
+
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-green-700">
+            Update Medicine
+          </h2>
+          <p className="text-sm text-gray-500">
+            Modify product details in PharmaAssist inventory
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <input
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Medicine Name"
+            className="border rounded-xl p-3 focus:outline-green-400"
+          />
+
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="border rounded-xl p-3 focus:outline-green-400"
+          >
+            <option value="">Select Category</option>
+            {categoryOptions.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          <input
+            name="price"
+            type="number"
+            value={formData.price}
+            onChange={handleChange}
+            placeholder="Price (PKR)"
+            className="border rounded-xl p-3 focus:outline-green-400"
+          />
+
+          <input
+            name="stock"
+            type="number"
+            value={formData.stock}
+            onChange={handleChange}
+            placeholder="Stock Quantity"
+            className="border rounded-xl p-3 focus:outline-green-400"
+          />
+
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Medicine description..."
+            rows={4}
+            className="border rounded-xl p-3 md:col-span-2 focus:outline-green-400"
+          />
+
+          {/* Image upload */}
+          <div className="md:col-span-2">
+            <label className="flex items-center gap-2 border border-dashed border-green-300 p-4 rounded-xl cursor-pointer hover:bg-green-50">
+              <UploadCloud className="w-5 h-5 text-green-600" />
+              <span className="text-sm text-gray-600">
+                Upload new images (optional)
+              </span>
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="md:col-span-2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition"
+          >
+            {loading ? (
+              <>
+                <LoaderCircle className="w-5 h-5 animate-spin" />
+                Updating Product...
+              </>
+            ) : (
+              "Update Medicine"
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default UpdateProductModal;
