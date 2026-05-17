@@ -121,7 +121,7 @@ export const dashboardStats = catchAsyncError(async (req, res, next) => {
 const yesterdayRevenue = yesterdayAgg[0]?.total || 0;
 
   // USERS
-  const totalUsers = await User.countDocuments({ role: "User" });
+  const totalUsers = await User.countDocuments({ role: "user" });
 
   // ORDER STATUS
   const statusAgg = await Order.aggregate([
@@ -212,15 +212,21 @@ statusAgg.forEach((s) => {
   const currentMonthSales = currentMonthAgg[0]?.total || 0;
   const lastMonthSales = lastMonthAgg[0]?.total || 0;
 
-  let growth = 0;
-  if (lastMonthSales > 0) {
-    growth = ((currentMonthSales - lastMonthSales) / lastMonthSales) * 100;
-  }
+ let growth = 0;
+
+if (lastMonthSales === 0 && currentMonthSales > 0) {
+  growth = 100;
+} else if (lastMonthSales > 0) {
+  growth =
+    ((currentMonthSales - lastMonthSales) /
+      lastMonthSales) *
+    100;
+}
 
   // NEW USERS
   const newUsers = await User.countDocuments({
     createdAt: { $gte: currentMonthStart },
-    role: "User",
+    role: "user",
   });
 
   // FINAL RESPONSE
