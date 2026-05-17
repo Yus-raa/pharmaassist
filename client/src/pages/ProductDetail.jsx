@@ -352,13 +352,13 @@ const ProductDetail = () => {
                 Add To Cart
               </button>
 
-              <button className="rounded-2xl border border-[#D6EEEE] px-5 py-4 hover:bg-[#F7FCFC] transition">
+              {/* <button className="rounded-2xl border border-[#D6EEEE] px-5 py-4 hover:bg-[#F7FCFC] transition">
                 <Heart className="w-5 h-5 text-gray-700" />
               </button>
 
               <button onClick={handleCopyURL} className="rounded-2xl border border-[#D6EEEE] px-5 py-4 hover:bg-[#F7FCFC] transition">
                 <Share2 className="w-5 h-5 text-gray-700" />
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

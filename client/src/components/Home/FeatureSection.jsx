@@ -22,10 +22,10 @@ const FeatureSection = () => {
     {
       icon: CalendarHeart,
 
-      title: "Doctor Appointments",
+      title: "Smart Search",
 
       description:
-        "Book appointments with healthcare specialists and manage consultations easily in one place.",
+        "Retrieves medicines based on user intent rather than exact keywords.",
     },
 
     {
